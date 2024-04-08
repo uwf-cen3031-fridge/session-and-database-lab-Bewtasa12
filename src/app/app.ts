@@ -1,48 +1,32 @@
-// Import the express and pino (logger) libraries
-import express, { Application } from "express";
-import { pino } from 'pino';
+import express from 'express';
+import session from 'express-session';
+import bodyParser from 'body-parser';
+// Import other necessary services and routers
 
-// Import our code (controllers and middleware)
-import { AppController } from "./controllers/app.controller";
-import { ErrorMiddleware } from "./middleware/error.middleware";
-import { HandlebarsMiddleware } from "./middleware/handlebars.middleware";
+const app = express();
+const port = 3000;
 
-class App {
-  // Create an instance of express, called "app"
-  public app: Application = express();
-  public port: number;
-  private log: pino.Logger = pino();
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(session({
+  secret: 'yourSecretKey',
+  resave: false,
+  saveUninitialized: true,
+}));
 
-  // Middleware and controller instances
-  private errorMiddleware: ErrorMiddleware;
-  private appController: AppController;
+app.get('/login', (req, res) => {
+  res.send('Login form goes here.'); // Replace with rendering view
+});
 
-  constructor(port: number) {
-    this.port = port;
+app.post('/login', (req, res) => {
+  // Authentication logic
+});
 
-    // Init the middlware and controllers
-    this.errorMiddleware = new ErrorMiddleware();
-    this.appController = new AppController();
+app.get('/logout', (req, res) => {
+  // Logout logic
+});
 
-    // Serve all static resources from the public directory
-    this.app.use(express.static(__dirname + "/public"));
+app.get('/', (req, res) => {
+  // Home page logic
+});
 
-    // Set up handlebars for our templating
-    HandlebarsMiddleware.setup(this.app);
-
-    // Tell express what to do when our routes are visited
-    this.app.use(this.appController.router);
-    this.app.use(this.errorMiddleware.router);
-  }
-
-  public listen() {
-    // Tell express to start listening for requests on the port we specified
-    this.app.listen(this.port, () => {
-      this.log.info(
-        `Express started on http://localhost:${this.port}; press Ctrl-C to terminate.`
-      );
-    });
-  }
-}
-
-export default App;
+app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
